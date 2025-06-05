@@ -9,9 +9,11 @@ class PlayerData:
         self.namae = name
         self.No = no
         self.Mpoint = 0
+        self.MpoitnPar = 0.000
+        self.OpMpPar = 0.000
         self.taisenAite = []
     def Hyouji(self):
-        print(f"{self.No+1} {self.namae} 対戦履歴：{self.taisenAite}")
+        print(f"{self.No+1} {self.namae} 勝ち点：{self.Mpoint} マッチポイント％：{self.MpoitnPar} オポポイント％：{self.OpMpPar} 対戦履歴：{self.taisenAite}")
     def TaisenNyuryoku(self, aite):
         self.taisenAite.append(aite)
 
@@ -63,7 +65,7 @@ class Taisen:
             self.errFlag = False
         k = kekka
         print(f"{len(k)=} {k=} {self.retu=}")
-        if not len(k) == self.retu -1:
+        if not len(k) == self.retu -1 and k:
             msg = "勝負の数の数字が少ないか多いです。"
             self.errFlag = True
         for i in k:
@@ -164,7 +166,7 @@ for i in range(len(kari)):
     playerdata.append(PlayerData(kari[i][1],i))
 
 if len(minna) % 2:
-    playerdata.append(PlayerData("byb",len(minna)))
+    playerdata.append(PlayerData("byb ",len(minna)))
 
 #最初の対戦相手決定
 for i in range(len(playerdata)):
@@ -188,7 +190,7 @@ kekka = ""
 while tisen1.ErrorCheck(kekka):
 
     print("勝った数の数字を左と右の方を連続で入力して下さい。\n席ごとにスペースで区切って下さい\n（2か1か0）")
-    kekka = input("入力:").split("  ")
+    kekka = input("入力:").split(" ")
 
 
 
