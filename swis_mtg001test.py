@@ -8,6 +8,7 @@ class PlayerData:
     def __init__(self, name, no):
         self.namae = name
         self.No = no
+        self.Juni = no
         self.Mpoint = 0
         self.MpointPar = 0.000
         self.OpMpPar = 0.000
@@ -177,6 +178,7 @@ class TaisenKime:
         self.souKazu = 0
 
         self.souSyurui = []
+        self.taisenKime = []
 
         for i in playerdata:
             if not i.Mpoint in self.souSyurui:
@@ -187,13 +189,129 @@ class TaisenKime:
 
         for i in self.souSyurui:
             kazuSyurui = 0
+            sou1 = []
             for j in playerdata:
                 if j.Mpoint == i:
-                    self.sou.append(j.No)
+                    sou1.append(j.No)
                     kazuSyurui = kazuSyurui + 1
+            self.sou.append(sou1)
             self.souKata.append(kazuSyurui)
+        #層を作った
+        self.souKataFlag = []
+        for i in self.souKata:
+            if i % 2:
+                self.souKataFlag.append(False)
+            else:
+                self.souKataFlag.append(True)
 
-        pass
+
+#偶数の層のチェック
+#偶数なら
+#それぞれの層の選手の対戦相手履歴をチェック
+        kazu = 0
+        for i in range(len(self.souKataFlag)):
+            if self.souKataFlag[i]:
+                
+                for j in self.sou[i]:
+                    kazuAite = 0
+                    for k in self.sou[i]:
+                        if k in playerdata[j].TaisenAiteNo:
+                            kazuAite = kazuAite + 1
+                    if kazuAite == len(self.sou):
+                        self.souKataFlag[i] = False
+                        
+#奇数だったり既出の対戦相手なら層を跨いで対戦相手を選ぶ
+
+#対戦相手を決める
+#既出じゃない相手にする
+#既出の対戦相手の数を出す
+
+#対戦相手を決める。　この前までに決定すること：？
+
+
+#対戦履歴を見る
+        kazuRireki = []
+
+        for i in self.sou:
+            
+            soukazu = []
+            for j in range(len(i)):
+                kazu = 0
+                for k in range(len(i)):
+                    if i[k] in pdata[i[j]].TaisenAiteNo:
+                        kazu = kazu + 1
+                soukazu.append(kazu)
+            
+            kazuRireki.append(soukazu)
+        
+        banSou = 0
+        for i in kazuRireki:
+            for j in i:
+                if j == len(i) -1:
+                    self.souKataFlag[banSou] = False
+
+            banSou = banSou + 1
+
+        irekaeSou = []
+        for i in range(len(self.sou)):
+            if not self.souKataFlag[i]:
+
+                if i > 0 and i < len(self.sou):
+
+                    if len(self.sou[i - 1]) > 2:
+                        #上の層と入れ替え
+                        irekaeSou.append(i - 1)
+                        
+                
+                    elif len(self.sou[i + 1]) > 2:
+
+                        #下の層と入れ替え
+                        irekaeSou.append(i + 1)
+                    
+
+                #上と下の第一層と出来なかったら？
+
+        for i in irekaeSou:
+            self.souKataFlag[i] = False
+
+#souKataFlagがtureなら、その層だけで組合わせ。falseならfalseの層で組合わせ
+#アプデ：近い層だけで固まるようにする
+        print(kazuRireki)
+        print(self.souKataFlag)
+        self.ketteiSou = []
+        self.ketteiSouKarifalse = []
+        for i in range(len(self.sou)):
+            if self.souKataFlag[i]:
+                self.ketteiSou.append(self.sou[i])
+            else:
+                self.ketteiSouKarifalse = self.ketteiSouKarifalse + self.sou[i]
+        
+        print(self.ketteiSou)
+        print(self.ketteiSouKarifalse)
+
+
+
+#対戦相手を入れる
+    def kimeru(self, p,pdata):#p=リスト[層の選手]
+
+
+        for i in range(len(p)):
+
+            if j % 2:
+                pdata[p[i]].TaisenAiteNo.append(p[i - 1])
+                    
+            else:
+                pdata[p[i]].TaisenAiteNo.append(p[i + 1])
+                
+            tainamae = pdata[pdata[p[i]].TaisenAiteNo[-1]].namae
+            pdata[p[i]].TaisenAite.append(tainamae)
+
+
+
+
+
+
+        return self.taisenKime
 
 #======================================================
 #メイン
@@ -284,8 +402,16 @@ for i in range(len(playerdata)):
     playerdata[i].Hyouji()
 
 taiKime = TaisenKime(playerdata)
-print(taiKime.sou)
-print(taiKime.souKata)
+
+
+for i in taiKime.ketteiSou:
+    taiKime.kimeru(i,playerdata)
+taiKime.kimeru(taiKime.ketteiSouKarifalse,playerdata)
+
+for i in range(len(playerdata)):
+    for j in range(len(playerdata)):
+        if i == playerdata[j].Juni:
+            playerdata[j].Hyouji()
 
 #課題：順位の入れ替わりを表示。マッチポイントの入り方を表示
 
