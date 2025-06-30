@@ -9,13 +9,16 @@ class PlayerData:
         self.namae = name
         self.No = no
         self.Mpoint = 0
-        self.MpoitnPar = 0.000
+        self.MpointPar = 0.000
         self.OpMpPar = 0.000
-        self.taisenAite = []
+        self.TaisenAite = []
+        self.TaisenAiteNo = []
+        self.KaisuTaisen = 0
     def Hyouji(self):
-        print(f"{self.No+1} {self.namae} 勝ち点：{self.Mpoint} マッチポイント％：{self.MpoitnPar} オポポイント％：{self.OpMpPar} 対戦履歴：{self.taisenAite}")
-    def TaisenNyuryoku(self, aite):
-        self.taisenAite.append(aite)
+        print(f"{self.No+1} {self.namae} 勝ち点：{self.Mpoint} mp%：{self.MpointPar} opmp%：{self.OpMpPar} 対戦履歴：{self.TaisenAite}")
+    def TaisenNyuryoku(self, aite, no):
+        self.TaisenAite.append(aite)
+        self.TaisenAiteNo.append(no)
 
 #クラス　初席決め
 class RandmInit:
@@ -64,7 +67,7 @@ class Taisen:
         if not kekka == "":
             self.errFlag = False
         k = kekka
-        print(f"{len(k)=} {k=} {self.retu=}")
+#        print(f"{len(k)=} {k=} {self.retu=}")
         if not len(k) == self.retu -1 and k:
             msg = "勝負の数の数字が少ないか多いです。"
             self.errFlag = True
@@ -110,6 +113,30 @@ class HyoujiKatiMake:
     def __init__(self):
         self.tatakaiSu = 0
         pass
+    def kekkaIre(self, kekka):
+        hidari = 0
+        migi = 0
+
+        if kekka[0] == "2":
+            hidari = 3
+            migi = 0
+        elif kekka[1] == "2":
+            hidari = 0
+            migi = 3
+        elif kekka[0] == "1":
+            if kekka[1] == "1":
+                hidari = 1
+                migi = 1
+            elif kekka[1] == "0":
+                hidari = 3
+                migi = 0
+        elif kekka[1] == "1":
+            if kekka[0] == 0:
+                hidari = 0
+                migi = 3
+
+        return hidari,migi
+
     def hyouji(self, kekka):
 
         hidari = ""
@@ -137,11 +164,36 @@ class HyoujiKatiMake:
 
         #表示 拡張あり
         if mannaka == "引き分け":
-            print(f"{mannaka}")
+            print(f"{self.tatakaiSu +1}席目：{mannaka}")
         else:
             print(f"{self.tatakaiSu +1}席目：{hidari} {mannaka} {migi}")
         self.tatakaiSu += 1
+    
+class TaisenKime:
+    def __init__(self, pdata):
+        #勝ち点で層を作る
+        self.sou = []
+        self.souKata = []
+        self.souKazu = 0
 
+        self.souSyurui = []
+
+        for i in playerdata:
+            if not i.Mpoint in self.souSyurui:
+                self.souSyurui.append(i.Mpoint)
+            
+        self.souSyurui.sort(reverse=True)
+        self.souKazu = len(self.souSyurui)
+
+        for i in self.souSyurui:
+            kazuSyurui = 0
+            for j in playerdata:
+                if j.Mpoint == i:
+                    self.sou.append(j.No)
+                    kazuSyurui = kazuSyurui + 1
+            self.souKata.append(kazuSyurui)
+
+        pass
 
 #======================================================
 #メイン
@@ -171,14 +223,15 @@ if len(minna) % 2:
 #最初の対戦相手決定
 for i in range(len(playerdata)):
     if i % 2:
-        playerdata[i].TaisenNyuryoku(playerdata[i-1].namae)
+        playerdata[i].TaisenNyuryoku(playerdata[i-1].namae,playerdata[i-1].No)
     else:
-        playerdata[i].TaisenNyuryoku(playerdata[i+1].namae)
+        playerdata[i].TaisenNyuryoku(playerdata[i+1].namae,playerdata[i+1].No)
 
 
 #プレイヤーデータ表示１回目
 for i in range(len(playerdata)):
     playerdata[i].Hyouji()
+
 
 tisen1 = Taisen(playerdata)
 tisen1.Hyouji()
@@ -194,9 +247,45 @@ while tisen1.ErrorCheck(kekka):
 
 
 
-print(kekka)
 
-
-
+ireruMp = []
 for i in range(syoubuSu):
     katimake.hyouji(kekka[i])
+    no = tisen1.tList[i][0]
+    ire = katimake.kekkaIre(kekka[i])
+    ireruMp.append(ire[0])
+    ireruMp.append(ire[1])
+
+
+#マッチポイントとマッチポイントパーとオポメントポイントパーをプレイヤーデータに入れる。アプデ：クラス化する。
+ind = 0
+for i in tisen1.tList:
+
+    for j in range(len(ireruMp)):
+        
+        if playerdata[j].No == i[0]:
+            playerdata[j].Mpoint = ireruMp[ind]
+            playerdata[j].KaisuTaisen = playerdata[j].KaisuTaisen +1
+            mpper = playerdata[j].Mpoint / ( playerdata[j].KaisuTaisen * 3)
+
+            if mpper >= 0.333:
+                playerdata[j].MpointPar = "{:.3f}".format(mpper)
+            else:
+                playerdata[j].MpointPar = 0.333
+            opp = 0.000
+            for k in playerdata[j].TaisenAiteNo:
+                opp = opp + playerdata[k].Mpoint
+
+            playerdata[j].OpMpPar = opp
+    ind = ind + 1
+
+print("")
+for i in range(len(playerdata)):
+    playerdata[i].Hyouji()
+
+taiKime = TaisenKime(playerdata)
+print(taiKime.sou)
+print(taiKime.souKata)
+
+#課題：順位の入れ替わりを表示。マッチポイントの入り方を表示
+
