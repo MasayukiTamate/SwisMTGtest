@@ -269,7 +269,7 @@ class TaisenKime:
                         irekaeSou.append(i + 1)
                     
 
-                #上と下の第一層と出来なかったら？
+                #課題：上と下の第一層と出来なかったら？
 
         for i in irekaeSou:
             self.souKataFlag[i] = False
@@ -291,10 +291,28 @@ class TaisenKime:
 
 
 
-#対戦相手を入れる
+#対戦相手を決定の最終的な処理。
     def kimeru(self, p,pdata):#p=リスト[層の選手]
 
+        #ソート
+        #既出の相手を外す
+        no = 0
+        saidai = 0.000
+        matomaridata = []
 
+        for i in range(len(p)):
+            opmpper = pdata[p[i]].OpMpPar
+            if saidai < opmpper:
+                saidai = opmpper
+                no = p[i]
+        matomaridata.append([no,saidai])
+
+        p.remove(no)
+        
+        print(f"{no=}{saidai=}")
+        print(p)
+
+        #対戦相手を入れる
         for i in range(len(p)):
 
             if j % 2:
@@ -302,7 +320,7 @@ class TaisenKime:
                     
             else:
                 pdata[p[i]].TaisenAiteNo.append(p[i + 1])
-                
+            #対戦相手の名前を入れる
             tainamae = pdata[pdata[p[i]].TaisenAiteNo[-1]].namae
             pdata[p[i]].TaisenAite.append(tainamae)
 
@@ -387,31 +405,34 @@ for i in tisen1.tList:
             mpper = playerdata[j].Mpoint / ( playerdata[j].KaisuTaisen * 3)
 
             if mpper >= 0.333:
-                playerdata[j].MpointPar = "{:.3f}".format(mpper)
+                playerdata[j].MpointPar = float("{:.3f}".format(mpper))
             else:
                 playerdata[j].MpointPar = 0.333
             opp = 0.000
             for k in playerdata[j].TaisenAiteNo:
                 opp = opp + playerdata[k].Mpoint
 
-            playerdata[j].OpMpPar = opp
+            op = opp / ( playerdata[j].KaisuTaisen * 3)
+            playerdata[j].OpMpPar = float("{:.3f}".format(op))
+            print(type(playerdata[j].OpMpPar))
+            print(type(playerdata[j].MpointPar))
     ind = ind + 1
 
 print("")
 for i in range(len(playerdata)):
     playerdata[i].Hyouji()
 
+#対戦相手を決める
 taiKime = TaisenKime(playerdata)
-
 
 for i in taiKime.ketteiSou:
     taiKime.kimeru(i,playerdata)
 taiKime.kimeru(taiKime.ketteiSouKarifalse,playerdata)
 
 for i in range(len(playerdata)):
-    for j in range(len(playerdata)):
-        if i == playerdata[j].Juni:
-            playerdata[j].Hyouji()
+    for j in playerdata:
+        if i == j.Juni:
+            j.Hyouji()
 
 #課題：順位の入れ替わりを表示。マッチポイントの入り方を表示
 
