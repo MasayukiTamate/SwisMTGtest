@@ -226,7 +226,7 @@ class TaisenKime:
 #既出じゃない相手にする
 #既出の対戦相手の数を出す
 
-#対戦相手を決める。　この前までに決定すること：？
+#対戦相手を決める。　この前までに決定することは？
 
 
 #対戦履歴を見る
@@ -296,22 +296,26 @@ class TaisenKime:
 
         #ソート
         #既出の相手を外す
-        no = 0
-        saidai = 0.000
+
         matomaridata = []
+        while p:
+            no = ""
+            saidai = 0.000
+            for i in range(len(p)):
+                opmpper = pdata[p[i]].OpMpPar
+                if saidai <= opmpper:
+                    saidai = opmpper
+                    no = p[i]
 
-        for i in range(len(p)):
-            opmpper = pdata[p[i]].OpMpPar
-            if saidai < opmpper:
-                saidai = opmpper
-                no = p[i]
-        matomaridata.append([no,saidai])
+            matomaridata.append([no,saidai])
 
-        p.remove(no)
+            p.remove(no)
         
-        print(f"{no=}{saidai=}")
-        print(p)
-
+        for i in matomaridata:
+            p.append(i[0])
+        
+        pass
+    def kimeru2(self,p,pdata):
         #対戦相手を入れる
         for i in range(len(p)):
 
@@ -323,6 +327,8 @@ class TaisenKime:
             #対戦相手の名前を入れる
             tainamae = pdata[pdata[p[i]].TaisenAiteNo[-1]].namae
             pdata[p[i]].TaisenAite.append(tainamae)
+            pdata[p[i]].Juni = i
+        pass
 
 
 
